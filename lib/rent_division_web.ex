@@ -23,6 +23,26 @@ defmodule RentDivisionWeb do
 
       import Plug.Conn
       alias RentDivisionWeb.Router.Helpers, as: Routes
+
+      defp error_code_for(%{valid?: false, errors: errors} = changeset) do
+        all_opts = Enum.map(errors, fn {_k, {_msg, opts}} -> opts end)
+
+        cond do
+          Enum.any?(all_opts, &(Keyword.get(&1, :validation) == :required)) -> :bad_request
+          Enum.any?(all_opts, &(Keyword.get(&1, :constraint) == :unique)) -> :conflict
+          Enum.any?(all_opts, &(Keyword.get(&1, :constraint) == :foreign)) -> :not_found
+          true -> :bad_request
+        end
+      end
+
+      defp render_error_changeset(conn, changeset) do
+        error_code = error_code_for(changeset)
+
+        conn
+        |> put_status(error_code)
+        |> put_view(RentDivisionWeb.ErrorView)
+        |> render("changeset.json", changeset: changeset)
+      end
     end
   end
 

@@ -5,7 +5,15 @@ defmodule RentDivisionWeb.Router do
     plug :accepts, ["json"]
   end
 
-  scope "/api", RentDivisionWeb do
+  scope "/", RentDivisionWeb do
     pipe_through :api
+
+    resources "/apartments", ApartmentController, only: [:show, :create] do
+      post "/renters", RenterController, :create
+      post "/rooms", RoomController, :create
+    end
+
+    get "/renters/:renter_id", RenterController, :show
+    post "/renters/:renter_id/valuations", ValuationController, :create
   end
 end

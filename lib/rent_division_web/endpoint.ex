@@ -10,9 +10,9 @@ defmodule RentDivisionWeb.Endpoint do
     signing_salt: "gfzt/70E"
   ]
 
-  socket "/socket", RentDivisionWeb.UserSocket,
-    websocket: true,
-    longpoll: false
+  # socket "/socket", RentDivisionWeb.UserSocket,
+  #   websocket: true,
+  #   longpoll: false
 
   # Serve at "/" the static files from "priv/static" directory.
   #
