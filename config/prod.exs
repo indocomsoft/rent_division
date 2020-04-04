@@ -16,8 +16,14 @@ host =
     environment variable WEB_HOST is missing.
     """
 
+port =
+  System.get_env("PORT") ||
+    raise """
+    environment variable PORT is missing.
+    """
+
 config :rent_division, RentDivisionWeb.Endpoint,
-  url: [host: host, port: 80],
+  url: [host: host, port: port],
   cache_static_manifest: "priv/static/cache_manifest.json"
 
 # Do not print debug messages in production
