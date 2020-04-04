@@ -18,7 +18,7 @@ defmodule RentDivision.Data do
 
   def get_apartment_without_preload!(id), do: Repo.get!(Apartment, id)
 
-  def create_apartment(attrs \\ %{}) do
+  def create_apartment(attrs) do
     %Apartment{}
     |> Apartment.changeset(attrs)
     |> Repo.insert()
@@ -40,7 +40,7 @@ defmodule RentDivision.Data do
 
   def get_room!(id), do: Repo.get!(Room, id)
 
-  defp create_room(attrs \\ %{}) do
+  defp create_room(attrs) do
     %Room{}
     |> Room.changeset(attrs)
     |> Repo.insert()
@@ -61,7 +61,7 @@ defmodule RentDivision.Data do
 
   def get_renter_without_preload!(id), do: Repo.get!(Renter, id)
 
-  defp create_renter(attrs \\ %{}) do
+  defp create_renter(attrs) do
     %Renter{}
     |> Renter.changeset(attrs)
     |> Repo.insert()
@@ -73,7 +73,7 @@ defmodule RentDivision.Data do
 
   def get_valuation!(id), do: Repo.get!(Valuation, id)
 
-  defp create_valuation(attrs \\ %{}) do
+  defp create_valuation(attrs) do
     %Valuation{}
     |> Valuation.changeset(attrs)
     |> Repo.insert()
