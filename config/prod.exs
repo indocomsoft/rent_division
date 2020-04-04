@@ -22,9 +22,7 @@ port =
     environment variable PORT is missing.
     """
 
-config :rent_division, RentDivisionWeb.Endpoint,
-  url: [host: host, port: port],
-  cache_static_manifest: "priv/static/cache_manifest.json"
+config :rent_division, RentDivisionWeb.Endpoint, url: [host: host, port: port]
 
 # Do not print debug messages in production
 config :logger, level: :info
