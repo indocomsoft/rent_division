@@ -27,6 +27,8 @@ config :rent_division, RentDivisionWeb.Endpoint, url: [host: host, port: port]
 # Do not print debug messages in production
 config :logger, level: :info
 
+config :rent_division, RentDivision.RentWorker, dir: "priv/rent"
+
 # ## SSL Support
 #
 # To get SSL working, you will need to add the `https` key

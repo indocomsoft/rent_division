@@ -5,6 +5,8 @@ defmodule RentDivision.Application do
 
   use Application
 
+  alias RentDivision.RentWorker
+
   def start(_type, _args) do
     # List all child processes to be supervised
     children = [
@@ -15,6 +17,9 @@ defmodule RentDivision.Application do
       # Starts a worker by calling: RentDivision.Worker.start_link(arg)
       # {RentDivision.Worker, arg},
     ]
+
+    :ok = Honeydew.start_queue(:rent_queue, success_mode: {Honeydew.SuccessMode.Log, []})
+    :ok = Honeydew.start_workers(:rent_queue, RentWorker, num: 1)
 
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options

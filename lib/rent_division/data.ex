@@ -18,6 +18,28 @@ defmodule RentDivision.Data do
 
   def get_apartment_without_preload!(id), do: Repo.get!(Apartment, id)
 
+  @doc """
+  Returns {apartment_with_valuations_preloaded, num_renters}
+  """
+  @spec metadata_for_worker(binary() | integer()) :: {Apartment.t(), integer()} | nil
+  def metadata_for_worker(apartment_id) do
+    Apartment
+    |> preload(:valuations)
+    |> Repo.get(apartment_id)
+    |> case do
+      nil ->
+        nil
+
+      apartment = %Apartment{} ->
+        num_renters =
+          Renter
+          |> where(apartment_id: ^apartment_id)
+          |> Repo.aggregate(:count)
+
+        {apartment, num_renters}
+    end
+  end
+
   def create_apartment(attrs) do
     %Apartment{}
     |> Apartment.changeset(attrs)
@@ -143,7 +165,7 @@ defmodule RentDivision.Data do
 
     if num_valuations == num_renters * num_rooms do
       update_apartment(apartment, %{status: :ready})
-      # TODO async invoke job
+      Honeydew.async({:run, [id]}, :rent_queue)
     end
   end
 

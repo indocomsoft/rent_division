@@ -4,7 +4,7 @@ defmodule RentDivisionWeb.ValuationController do
   alias RentDivision.Data
 
   def create(conn, %{"renter_id" => renter_id, "valuations" => valuations}) do
-    renter = Data.get_renter_without_preload!(!renter_id)
+    renter = Data.get_renter_without_preload!(renter_id)
 
     case Data.create_valuations(renter, valuations) do
       {:ok, valuations} ->
