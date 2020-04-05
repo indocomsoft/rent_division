@@ -30,6 +30,14 @@ config :rent_division, RentDivisionWeb.Endpoint,
   ],
   secret_key_base: secret_key_base
 
+rent_dir =
+  System.get_env("RENT_DIR") ||
+    raise """
+    environment variable RENT_DIR is missing.
+    """
+
+config :rent_division, RentDivision.RentWOrker, dir: rent_dir
+
 # ## Using releases (Elixir v1.9+)
 #
 # If you are doing OTP releases, you need to instruct Phoenix

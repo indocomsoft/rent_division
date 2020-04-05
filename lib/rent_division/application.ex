@@ -5,6 +5,7 @@ defmodule RentDivision.Application do
 
   use Application
 
+  alias RentDivision.FailedRentWorker
   alias RentDivision.RentWorker
 
   def start(_type, _args) do
@@ -18,8 +19,23 @@ defmodule RentDivision.Application do
       # {RentDivision.Worker, arg},
     ]
 
-    :ok = Honeydew.start_queue(:rent_queue, success_mode: {Honeydew.SuccessMode.Log, []})
+    :ok =
+      Honeydew.start_queue(:failed_rent_queue,
+        failure_mode: {Honeydew.FailureMode.Retry, times: 3}
+      )
+
+    :ok =
+      Honeydew.start_queue(:rent_queue,
+        success_mode: {Honeydew.SuccessMode.Log, []},
+        failure_mode:
+          {Honeydew.FailureMode.Retry,
+           times: 3, finally: {Honeydew.FailureMode.Move, queue: :failed_rent_queue}}
+      )
+
+    :ok = Honeydew.start_workers(:failed_rent_queue, FailedRentWorker)
     :ok = Honeydew.start_workers(:rent_queue, RentWorker, num: 1)
+
+    compile_rent()
 
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options
@@ -32,5 +48,17 @@ defmodule RentDivision.Application do
   def config_change(changed, _new, removed) do
     RentDivisionWeb.Endpoint.config_change(changed, removed)
     :ok
+  end
+
+  defp compile_rent do
+    dir = RentWorker.get_dir!()
+
+    bin_path = Path.join(dir, "bin")
+    File.mkdir_p!(bin_path)
+
+    java_files = Path.wildcard(Path.join(dir, "src/*.java"))
+
+    {_, 0} =
+      System.cmd("javac", ["-d", bin_path, "-cp", Path.join(dir, "cplex.jar")] ++ java_files)
   end
 end

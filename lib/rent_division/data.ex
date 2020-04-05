@@ -4,11 +4,12 @@ defmodule RentDivision.Data do
   alias RentDivision.Repo
   alias RentDivision.Data.Apartment
   alias RentDivision.Data.Renter
+  alias RentDivision.Data.Result
   alias RentDivision.Data.Room
   alias RentDivision.Data.Valuation
 
   @doc """
-  Also preloads rooms and renters
+  Also preloads rooms, renters and results
   """
   def get_apartment!(id) do
     Apartment
@@ -50,7 +51,7 @@ defmodule RentDivision.Data do
     end
   end
 
-  defp update_apartment(%Apartment{} = apartment, attrs) do
+  def update_apartment(%Apartment{} = apartment, attrs) do
     apartment
     |> Apartment.update_changeset(attrs)
     |> Repo.update()
@@ -103,6 +104,16 @@ defmodule RentDivision.Data do
 
   def delete_valuation(%Valuation{} = valuation) do
     Repo.delete(valuation)
+  end
+
+  def create_result(attrs) do
+    %Result{}
+    |> Result.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  def delete_result(%Result{} = result) do
+    Repo.delete(result)
   end
 
   def create_rooms(%Apartment{id: apartment_id}, room_names) when is_list(room_names) do
@@ -206,5 +217,22 @@ defmodule RentDivision.Data do
     else
       {:error, :wrong_sum}
     end
+  end
+
+  def create_results(results, %Apartment{id: apartment_id} = apartment) do
+    Repo.transaction(fn ->
+      Enum.map(results, fn %{renter_id: _, room_id: _, rent: _} = attrs ->
+        results =
+          case create_result(Map.put(attrs, :apartment_id, apartment_id)) do
+            {:ok, result} -> result
+            {:error, changeset} -> Repo.rollback(changeset)
+          end
+
+        case update_apartment(apartment, %{status: :finished}) do
+          {:ok, _} -> results
+          {:error, changeset} -> Repo.rollback(changeset)
+        end
+      end)
+    end)
   end
 end
