@@ -36,7 +36,7 @@ rent_dir =
     environment variable RENT_DIR is missing.
     """
 
-config :rent_division, RentDivision.RentWOrker, dir: rent_dir
+config :rent_division, RentDivision.RentWorker, dir: rent_dir
 
 # ## Using releases (Elixir v1.9+)
 #
