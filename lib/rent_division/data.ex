@@ -1,12 +1,16 @@
 defmodule RentDivision.Data do
+  @moduledoc """
+  The data context, containing data for the whole application.
+  """
+
   import Ecto.Query, warn: false
 
-  alias RentDivision.Repo
   alias RentDivision.Data.Apartment
   alias RentDivision.Data.Renter
   alias RentDivision.Data.Result
   alias RentDivision.Data.Room
   alias RentDivision.Data.Valuation
+  alias RentDivision.Repo
 
   @doc """
   Also preloads rooms, renters and results
@@ -21,7 +25,7 @@ defmodule RentDivision.Data do
 
   def find_ready_apartment_ids do
     Apartment
-    |> where(status: :ready)
+    |> where(status: ^:ready)
     |> select([a], a.id)
     |> Repo.all()
   end
@@ -128,19 +132,18 @@ defmodule RentDivision.Data do
     |> where(apartment_id: ^apartment_id)
     |> Repo.exists?()
     |> case do
-      false ->
-        Repo.transaction(fn ->
-          Enum.map(room_names, fn room_name ->
-            case create_room(%{"apartment_id" => apartment_id, "name" => room_name}) do
-              {:ok, room} -> room
-              {:error, changeset} -> Repo.rollback(changeset)
-            end
-          end)
-        end)
-
-      true ->
-        {:error, :already_done}
+      false -> Repo.transaction(fn -> do_create_rooms(apartment_id, room_names) end)
+      true -> {:error, :already_done}
     end
+  end
+
+  defp do_create_rooms(apartment_id, room_names) when is_list(room_names) do
+    Enum.map(room_names, fn room_name ->
+      case create_room(%{"apartment_id" => apartment_id, "name" => room_name}) do
+        {:ok, room} -> room
+        {:error, changeset} -> Repo.rollback(changeset)
+      end
+    end)
   end
 
   def create_renters(%Apartment{id: apartment_id}, names) when is_list(names) do
@@ -148,22 +151,21 @@ defmodule RentDivision.Data do
     |> where(apartment_id: ^apartment_id)
     |> Repo.exists?()
     |> case do
-      false ->
-        Repo.transaction(fn ->
-          Enum.map(names, fn name ->
-            case create_renter(%{"apartment_id" => apartment_id, "name" => name}) do
-              {:ok, renter} -> renter
-              {:error, changeset} -> Repo.rollback(changeset)
-            end
-          end)
-        end)
-
-      true ->
-        {:error, :already_done}
+      false -> Repo.transaction(fn -> do_create_renters(apartment_id, names) end)
+      true -> {:error, :already_done}
     end
   end
 
-  def update_apartment_status(apartment = %Apartment{id: id}) do
+  defp do_create_renters(apartment_id, names) when is_list(names) do
+    Enum.map(names, fn name ->
+      case create_renter(%{"apartment_id" => apartment_id, "name" => name}) do
+        {:ok, renter} -> renter
+        {:error, changeset} -> Repo.rollback(changeset)
+      end
+    end)
+  end
+
+  def update_apartment_status(%Apartment{id: id} = apartment) do
     apartment_query = Apartment |> where(id: ^id)
 
     num_valuations =
@@ -228,18 +230,20 @@ defmodule RentDivision.Data do
 
   def create_results(results, %Apartment{id: apartment_id} = apartment) do
     Repo.transaction(fn ->
-      Enum.map(results, fn %{renter_id: _, room_id: _, rent: _} = attrs ->
-        results =
+      results =
+        Enum.map(results, fn %{renter_id: _, room_id: _, rent: _} = attrs ->
           case create_result(Map.put(attrs, :apartment_id, apartment_id)) do
             {:ok, result} -> result
             {:error, changeset} -> Repo.rollback(changeset)
           end
+        end)
 
-        case update_apartment(apartment, %{status: :finished}) do
-          {:ok, _} -> results
-          {:error, changeset} -> Repo.rollback(changeset)
-        end
-      end)
+      case update_apartment(apartment, %{status: :finished}) do
+        {:ok, _} -> results
+        {:error, changeset} -> Repo.rollback(changeset)
+      end
+
+      results
     end)
   end
 end

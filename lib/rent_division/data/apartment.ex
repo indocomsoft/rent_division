@@ -1,13 +1,17 @@
 defmodule RentDivision.Data.Apartment do
+  @moduledoc """
+  Represents an apartment, one unit in the rent division calculations
+  """
+
   use Ecto.Schema
 
   import Ecto.Changeset
 
   alias RentDivision.Data.JobStatus
   alias RentDivision.Data.Renter
+  alias RentDivision.Data.Result
   alias RentDivision.Data.Room
   alias RentDivision.Data.Valuation
-  alias RentDivision.Data.Result
 
   schema "apartments" do
     field :name, :string

@@ -1,4 +1,8 @@
 defmodule RentDivision.Data.Valuation do
+  @moduledoc """
+  Represents a valuation given by a renter to a room in an apartment.
+  """
+
   use Ecto.Schema
 
   import Ecto.Changeset

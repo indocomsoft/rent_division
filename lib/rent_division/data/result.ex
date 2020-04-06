@@ -1,4 +1,8 @@
 defmodule RentDivision.Data.Result do
+  @moduledoc """
+  Represents one row in the rent division algorithm result.
+  """
+
   use Ecto.Schema
 
   import Ecto.Changeset

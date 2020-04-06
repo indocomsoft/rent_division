@@ -1,4 +1,8 @@
 defmodule RentDivision.RentWorker do
+  @moduledoc """
+  The worker that actually performs the rent division algorithm
+  """
+
   @behaviour Honeydew.Worker
 
   alias RentDivision.Data
@@ -49,7 +53,7 @@ defmodule RentDivision.RentWorker do
     end
   end
 
-  def get_dir!() do
+  def get_dir! do
     config =
       Application.get_env(:rent_division, RentDivision.RentWorker) ||
         raise "RentDivision.RentWorker config not set"

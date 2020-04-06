@@ -1,4 +1,8 @@
 defmodule RentDivision.Data.Renter do
+  @moduledoc """
+  Represents a renter in an apartment
+  """
+
   use Ecto.Schema
 
   import Ecto.Changeset
