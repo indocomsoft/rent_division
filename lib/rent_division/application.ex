@@ -5,6 +5,7 @@ defmodule RentDivision.Application do
 
   use Application
 
+  alias RentDivision.Data
   alias RentDivision.FailedRentWorker
   alias RentDivision.RentWorker
 
@@ -40,7 +41,11 @@ defmodule RentDivision.Application do
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options
     opts = [strategy: :one_for_one, name: RentDivision.Supervisor]
-    Supervisor.start_link(children, opts)
+    result = Supervisor.start_link(children, opts)
+
+    enqueue_ready_apartments()
+
+    result
   end
 
   # Tell Phoenix to update the endpoint configuration
@@ -60,5 +65,9 @@ defmodule RentDivision.Application do
 
     {_, 0} =
       System.cmd("javac", ["-d", bin_path, "-cp", Path.join(dir, "cplex.jar")] ++ java_files)
+  end
+
+  defp enqueue_ready_apartments do
+    Enum.map(Data.find_ready_apartment_ids(), &Honeydew.async({:run, [&1]}, :rent_queue))
   end
 end

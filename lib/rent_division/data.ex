@@ -19,6 +19,13 @@ defmodule RentDivision.Data do
 
   def get_apartment_without_preload!(id), do: Repo.get!(Apartment, id)
 
+  def find_ready_apartment_ids do
+    Apartment
+    |> where(status: :ready)
+    |> select([a], a.id)
+    |> Repo.all()
+  end
+
   @doc """
   Returns {apartment_with_valuations_preloaded, num_renters}
   """
