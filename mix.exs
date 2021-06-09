@@ -41,7 +41,7 @@ defmodule RentDivision.MixProject do
       {:postgrex, ">= 0.0.0"},
       {:jason, "~> 1.0"},
       {:plug_cowboy, "~> 2.0"},
-      {:honeydew, "~> 1.4.5"},
+      {:honeydew, "~> 1.5.0"},
       {:briefly, "~> 0.3"},
       {:credo, "~> 1.3", only: [:dev, :test], runtime: false}
     ]
