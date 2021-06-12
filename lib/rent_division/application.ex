@@ -15,7 +15,8 @@ defmodule RentDivision.Application do
       # Start the Ecto repository
       RentDivision.Repo,
       # Start the endpoint when the application starts
-      RentDivisionWeb.Endpoint
+      RentDivisionWeb.Endpoint,
+      {Phoenix.PubSub, name: RentDivision.PubSub}
       # Starts a worker by calling: RentDivision.Worker.start_link(arg)
       # {RentDivision.Worker, arg},
     ]
